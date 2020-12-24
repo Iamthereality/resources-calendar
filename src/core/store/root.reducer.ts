@@ -3,12 +3,15 @@ import { AppEpic } from './store';
 import { ActionsObservable, combineEpics, StateObservable } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { appReducer, variantsEpic } from '../../app/app.slice';
 
-export const rootReducer = combineReducers({});
+export const rootReducer = combineReducers({
+  app: appReducer
+});
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const epics = [];
+const epics = [variantsEpic];
 
 export const rootEpic: AppEpic = (
   action$: ActionsObservable<AnyAction>,
