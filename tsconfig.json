@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "typeRoots": ["node_modules/@types"],
+    "types": ["resize-observer-browser"],
     "target": "es5",
     "lib": [
       "dom",

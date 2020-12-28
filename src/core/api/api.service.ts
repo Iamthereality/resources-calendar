@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs';
 import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { map } from 'rxjs/operators';
-import { OfficeInterface } from '../models/office.interface';
 import { GetOfficesResponse } from '../models/api.interface';
 
 const requestHeaders = {
