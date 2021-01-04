@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
-import { Root } from './app/components/root/root';
+import { App } from './modules/app-module/components/app/app';
 import './index.scss';
 import { Provider } from 'react-redux';
 import { store } from './core/store/store';
@@ -9,7 +9,7 @@ import { store } from './core/store/store';
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <Root />
+      <App />
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

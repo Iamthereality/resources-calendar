@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import './gantt-chart.scss';
-import { Chart } from '../chart/chart';
+import { Chart } from '../../../../shared/components/chart/chart';
 
 const options = {
   xAxis: {

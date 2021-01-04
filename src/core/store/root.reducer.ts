@@ -3,15 +3,19 @@ import { AppEpic } from './store';
 import { ActionsObservable, combineEpics, StateObservable } from 'redux-observable';
 import { catchError } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { appReducer, variantsEpic } from '../../app/app.slice';
+import { appReducer } from '../../modules/app-module/app.slice';
+import { officeReducer, officesEpic } from '../../modules/office-module/office.slice';
+import { ganttChartReducer } from '../../modules/gantt-chart-module/gantt-chart.slice';
 
 export const rootReducer = combineReducers({
-  app: appReducer
+  app: appReducer,
+  ganttChart: ganttChartReducer,
+  office: officeReducer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const epics = [variantsEpic];
+const epics = [officesEpic];
 
 export const rootEpic: AppEpic = (
   action$: ActionsObservable<AnyAction>,
