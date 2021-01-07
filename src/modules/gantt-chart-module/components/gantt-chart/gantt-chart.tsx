@@ -1,24 +1,15 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import './gantt-chart.scss';
 import { Chart } from '../../../../shared/components/chart/chart';
-
-const options = {
-  xAxis: {
-    type: 'category',
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
-    {
-      data: [820, 932, 901, 934, 1290, 1330, 1320],
-      type: 'bar',
-      smooth: true
-    }
-  ]
-};
+import { SubscriptionLike } from 'rxjs';
+import { getBitrixOffices } from '../../../../core/api/api.service';
 
 export const GantChart: FC = () => {
-  return <Chart options={options} />;
+  const request = useRef<SubscriptionLike>(null);
+  useEffect(() => {
+    request.current = getBitrixOffices().subscribe((resp: any) => console.log(resp));
+    return request.current.unsubscribe;
+  }, []);
+
+  return <Chart />;
 };
