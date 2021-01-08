@@ -1,4 +1,4 @@
-import { OfficeInterface } from './office.interface';
+import { AutoServiceInterface } from './auto-service.interface';
 
 interface ApiResponse {
   code: number;
@@ -6,10 +6,10 @@ interface ApiResponse {
   data?: any;
 }
 
-export interface GetOfficeResponse extends ApiResponse {
-  data: OfficeInterface;
+export interface GetAutoServiceResponse extends ApiResponse {
+  data: AutoServiceInterface;
 }
 
-export interface GetOfficesResponse extends ApiResponse {
-  data: OfficeInterface[];
+export interface GetAutoServicesResponse extends ApiResponse {
+  data: AutoServiceInterface[];
 }
