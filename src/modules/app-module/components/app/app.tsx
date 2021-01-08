@@ -1,12 +1,12 @@
 import React, { FC } from 'react';
 import './app.scss';
 import { GantChart } from '../../../gantt-chart-module/components/gantt-chart/gantt-chart';
-import { OfficeSelection } from '../../../office-module/components/office-selection/office-selection';
+import { AutoServiceSelection } from '../../../auto-service-module/components/auto-service-selection/auto-service-selection';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store/root.reducer';
 
 export const App: FC = (): JSX.Element => {
-  const { selectedOffice } = useSelector((state: RootState) => state.office);
+  const { selectedAutoService } = useSelector((state: RootState) => state.office);
 
-  return <div className='app'>{selectedOffice.id ? <GantChart /> : <OfficeSelection />}</div>;
+  return <div className='app'>{selectedAutoService.id ? <GantChart /> : <AutoServiceSelection />}</div>;
 };

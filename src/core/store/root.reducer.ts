@@ -4,18 +4,20 @@ import { ActionsObservable, combineEpics, StateObservable } from 'redux-observab
 import { catchError } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { appReducer } from '../../modules/app-module/app.slice';
-import { officeReducer, officesEpic } from '../../modules/office-module/office.slice';
+import { autoServiceReducer } from '../../modules/auto-service-module/auto-service.slice';
 import { ganttChartReducer } from '../../modules/gantt-chart-module/gantt-chart.slice';
 
 export const rootReducer = combineReducers({
   app: appReducer,
   ganttChart: ganttChartReducer,
-  office: officeReducer
+  office: autoServiceReducer
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const epics = [officesEpic];
+const epics = [
+  // AutoServicesEpic
+];
 
 export const rootEpic: AppEpic = (
   action$: ActionsObservable<AnyAction>,

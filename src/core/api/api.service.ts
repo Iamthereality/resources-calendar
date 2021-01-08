@@ -1,27 +1,26 @@
 import { Observable } from 'rxjs';
 import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { map } from 'rxjs/operators';
-import { GetOfficesResponse } from '../models/api.interface';
 
 const requestHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json'
 };
 
-// export const getBitrixOffices = (): Observable<GetOfficesResponse> => {
-//   return ajax({
-//     url: `${process.env.REACT_APP_API_URL}/offices`,
-//     method: 'GET',
-//     headers: requestHeaders
-//   }).pipe(
-//     map((data: AjaxResponse) => data.response),
-//     map((response: GetOfficesResponse) => response)
-//   );
-// };
-
-export const getBitrixOffices = (): Observable<any> => {
+export const getRawData = (): Observable<any> => {
   return ajax({
-    url: `https://bazis-motors.bitrix24.ru/rest/9/spnymubmmqyr1312/profile.json`,
+    url: `${process.env.REACT_APP_API_URL}/crm.deal.userfield.list.json?filter[USER_TYPE_ID]=resourcebooking`,
+    method: 'GET',
+    headers: requestHeaders
+  }).pipe(
+    map((data: AjaxResponse) => data.response),
+    map((response: any) => response)
+  );
+};
+
+export const getAutoServices = (id: string): Observable<any> => {
+  return ajax({
+    url: `${process.env.REACT_APP_API_URL}/crm.deal.userfield.get.json?id=${id}`,
     method: 'GET',
     headers: requestHeaders
   }).pipe(

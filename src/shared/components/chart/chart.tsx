@@ -1,6 +1,8 @@
 import React, { FC, useEffect, useRef } from 'react';
 import './chart.scss';
 import * as echarts from 'echarts';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../core/store/root.reducer';
 
 export declare class ResizeObserver {
   observe(target: Element): void;
@@ -73,12 +75,6 @@ function renderGanttItem(params, api) {
     width: barLength,
     height: barHeight
   });
-  const rectVIP = clipRectByRect(params, {
-    x: x,
-    y: y,
-    width: barLength / 2,
-    height: barHeight
-  });
   const rectText = clipRectByRect(params, {
     x: x,
     y: y,
@@ -94,12 +90,6 @@ function renderGanttItem(params, api) {
         ignore: !rectNormal,
         shape: rectNormal,
         style: api.style()
-      },
-      {
-        type: 'rect',
-        ignore: !rectVIP && !api.value(4),
-        shape: rectVIP,
-        style: api.style({ fill: '#ddb30b' })
       },
       {
         type: 'rect',
@@ -176,6 +166,7 @@ function clipRectByRect(params, rect) {
 }
 
 export const Chart: FC = () => {
+  const { selectedAutoService } = useSelector((state: RootState) => state.office);
   const eChart = useRef(null);
 
   useEffect(() => {
@@ -184,7 +175,7 @@ export const Chart: FC = () => {
       tooltip: {},
       animation: false,
       title: {
-        text: 'Gantt of Airport Flight',
+        text: `Бронирование ресурсов. ${selectedAutoService.address}`,
         left: 'center'
       },
       dataZoom: [
@@ -215,13 +206,15 @@ export const Chart: FC = () => {
           type: 'slider',
           yAxisIndex: 0,
           zoomLock: true,
-          width: 10,
-          right: 30,
+          width: 20,
+          right: 20,
           top: 70,
           bottom: 40,
           start: 95,
           end: 100,
-          handleSize: 0,
+          handleIcon:
+            'path://M10.7,11.9H9.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4h1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+          handleSize: '80%',
           showDetail: false
         },
         {
@@ -307,7 +300,7 @@ export const Chart: FC = () => {
       console.log('test');
     });
     initDrag(chart);
-  }, []);
+  }, [selectedAutoService.address]);
 
   function initDrag(eChart) {
     _autoDataZoomAnimator = makeAnimator(dispatchDataZoom);
