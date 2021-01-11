@@ -6,6 +6,7 @@ import { AutoServiceInterface } from '../../../../core/models/auto-service.inter
 import { setAutoServices, setSelectedAutoService } from '../../auto-service.slice';
 import { SubscriptionLike } from 'rxjs';
 import { getAutoServices, getRawData } from '../../../../core/api/api.service';
+import { LoadingIndicator } from '../../../../shared/components/loading-indicator/loading-indicator';
 
 export const AutoServiceSelection: FC = () => {
   const dispatch = useDispatch();
@@ -62,18 +63,26 @@ export const AutoServiceSelection: FC = () => {
     dispatch(setSelectedAutoService(autoService));
   };
 
-  return loading ? (
-    <h2>Loading</h2>
-  ) : (
+  return (
     <div className='office-selection__container'>
-      <h2 className='office-selection__header'>{autoServices.length > 0 ? 'Выберите офис' : 'Нет доступных офисов'}</h2>
-      <ul className='office-selection__offices'>
-        {autoServices.map((autoService: AutoServiceInterface) => (
-          <li key={autoService.id} className='office-selection__office' onClick={() => setAutoService(autoService)}>
-            <span>{autoService.address}</span>
-          </li>
-        ))}
-      </ul>
+      <h2 className='office-selection__header'>
+        {autoServices.length > 0 ? 'Выберите автосервис' : 'Получение данных'}
+      </h2>
+      {loading ? (
+        <LoadingIndicator />
+      ) : (
+        <ul className='office-selection__offices'>
+          {autoServices.map((autoService: AutoServiceInterface) => (
+            <li
+              key={autoService.address}
+              className='office-selection__office'
+              onClick={() => setAutoService(autoService)}
+            >
+              <span>{autoService.address}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
