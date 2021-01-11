@@ -1,5 +1,6 @@
 {
   "name": "resources-calendar",
+  "homepage": "/home/user/WebstormProjects/resources-calendar/build/",
   "version": "0.1.2",
   "private": true,
   "dependencies": {
