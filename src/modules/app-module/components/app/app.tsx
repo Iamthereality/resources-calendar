@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store/root.reducer';
 
 export const App: FC = (): JSX.Element => {
-  const { selectedAutoService } = useSelector((state: RootState) => state.office);
+  const { selectedAutoService } = useSelector((state: RootState) => state.autoService);
 
   return <div className='app'>{selectedAutoService.id ? <GantChart /> : <AutoServiceSelection />}</div>;
 };

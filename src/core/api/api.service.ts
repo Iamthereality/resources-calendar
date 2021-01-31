@@ -1,30 +1,26 @@
 import { Observable } from 'rxjs';
 import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { map } from 'rxjs/operators';
+import { GetAutoServicesResponse } from '../models/api.interface';
 
 const requestHeaders = {
   Accept: 'application/json',
   'Content-Type': 'application/json'
 };
 
-export const getRawData = (): Observable<any> => {
+export const getAutoServices = (): Observable<GetAutoServicesResponse> => {
   return ajax({
-    url: `${process.env.REACT_APP_API_URL}/crm.deal.userfield.list.json?filter[USER_TYPE_ID]=resourcebooking`,
+    url: `${process.env.REACT_APP_API_URL}/services.php`,
     method: 'GET',
     headers: requestHeaders
-  }).pipe(
-    map((data: AjaxResponse) => data.response),
-    map((response: any) => response)
-  );
+  }).pipe(map((resp: AjaxResponse) => resp.response));
 };
 
-export const getAutoServices = (id: string): Observable<any> => {
+export const getAutoServiceResources = (serviceId: string): Observable<any> => {
   return ajax({
-    url: `${process.env.REACT_APP_API_URL}/crm.deal.userfield.get.json?id=${id}`,
-    method: 'GET',
-    headers: requestHeaders
-  }).pipe(
-    map((data: AjaxResponse) => data.response),
-    map((response: any) => response)
-  );
+    url: `${process.env.REACT_APP_API_URL}/getres.php`,
+    method: 'POST',
+    headers: requestHeaders,
+    body: { serviceId }
+  }).pipe(map((resp: AjaxResponse) => resp.response));
 };
