@@ -6,6 +6,8 @@ import { Observable } from 'rxjs';
 import {
   autoServiceReducer,
   AutoServiceResourcesEpic,
+  AutoServiceDealsEpic,
+  AutoServiceProvidedServicesEpic,
   AutoServicesEpic
 } from '../../modules/auto-service-module/auto-service.slice';
 import { ganttChartReducer } from '../../modules/gantt-chart-module/gantt-chart.slice';
@@ -17,7 +19,7 @@ export const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const epics = [AutoServicesEpic, AutoServiceResourcesEpic];
+const epics = [AutoServicesEpic, AutoServiceResourcesEpic, AutoServiceDealsEpic, AutoServiceProvidedServicesEpic];
 
 export const rootEpic: AppEpic = (
   action$: ActionsObservable<AnyAction>,

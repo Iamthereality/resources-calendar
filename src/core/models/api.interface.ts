@@ -1,4 +1,4 @@
-import { AutoServiceInterface } from './auto-service.interface';
+import { AutoServiceInterface, DealInterface, ProvidedService, ResourcesInterface } from './auto-service.interface';
 
 interface ApiResponse {
   code?: number;
@@ -6,6 +6,18 @@ interface ApiResponse {
   data?: any;
 }
 
-export interface GetAutoServicesResponse extends ApiResponse {
+export interface AutoServicesResponse extends ApiResponse {
   data: AutoServiceInterface[];
+}
+
+export interface ResourcesResponse extends ApiResponse {
+  data: ResourcesInterface;
+}
+
+export interface DealsResponse extends ApiResponse {
+  data: DealInterface[];
+}
+
+export interface ProvidedServicesResponse extends ApiResponse {
+  data: ProvidedService[];
 }
