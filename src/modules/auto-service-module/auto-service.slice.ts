@@ -17,6 +17,7 @@ import {
   ProvidedServicesResponse,
   ResourcesResponse
 } from '../../core/models/api.interface';
+import { setChartIsLoading } from '../gantt-chart-module/gantt-chart.slice';
 
 interface AutoServiceSliceInterface {
   loading: boolean;
@@ -49,6 +50,7 @@ export const autoServiceSlice = createSlice({
     },
     setSelectedAutoService(state, action: PayloadAction<AutoServiceInterface>) {
       state.selectedAutoService = action.payload;
+      setLoading(false);
     },
     resetSelectedAutoService(state) {
       state.selectedAutoService = initialState.selectedAutoService;
@@ -145,7 +147,7 @@ export const AutoServiceDealsEpic: AppEpic = (
     switchMap(([, { autoService: { selectedAutoService } }]) =>
       getDeals(selectedAutoService.id).pipe(
         map((resp: DealsResponse) => resp.data),
-        concatMap((data: DealInterface[]) => [setAutoServiceDeals(data)])
+        concatMap((data: DealInterface[]) => [setAutoServiceDeals(data), getAutoServiceProvidedServices()])
       )
     )
   );
@@ -161,7 +163,7 @@ export const AutoServiceProvidedServicesEpic: AppEpic = (
     switchMap(([, { autoService: { selectedAutoService } }]) =>
       getProvidedServices(selectedAutoService.id).pipe(
         map((resp: ProvidedServicesResponse) => resp.data),
-        concatMap((data: ProvidedService[]) => [setAutoServiceProvidedServices(data)])
+        concatMap((data: ProvidedService[]) => [setAutoServiceProvidedServices(data), setChartIsLoading(false)])
       )
     )
   );

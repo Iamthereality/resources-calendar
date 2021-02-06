@@ -4,9 +4,10 @@ export interface AutoServiceInterface {
 }
 
 export interface EmployeeInterface {
+  id: string;
   name: string;
   surname: string;
-  lastname: string;
+  lastName: string;
   schedule: [];
   serviceType?: string;
 }
