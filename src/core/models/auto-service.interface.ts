@@ -25,6 +25,7 @@ export interface DealInterface {
   mechanicId: number;
   start: string;
   end: string;
+  status: string;
 }
 
 export interface ProvidedService {

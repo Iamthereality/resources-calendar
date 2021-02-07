@@ -11,11 +11,11 @@ import { LoadingIndicator } from '../../../../shared/components/loading-indicato
 
 export const GantChart: FC = () => {
   const dispatch = useDispatch();
-  const { acceptors, mechanics, deals } = useSelector((state: RootState) => state.autoService);
   const { chartIsLoading } = useSelector((state: RootState) => state.ganttChart);
 
   useEffect(() => {
     dispatch(getServiceResources());
+    setInterval(() => dispatch(getServiceResources()), 30000);
   }, [dispatch]);
 
   return chartIsLoading ? (
@@ -36,10 +36,10 @@ export const GantChart: FC = () => {
       </div>
       <div className='charts'>
         <div className='charts__top'>
-          <Chart chartTitle={'Приёмщики'} employees={acceptors} deals={deals} />
+          <Chart chartTitle={'Приёмщики'} isAcceptor={true} />
         </div>
         <div className='charts__bottom'>
-          <Chart chartTitle={'Механики'} employees={mechanics} deals={deals} />
+          <Chart chartTitle={'Механики'} isAcceptor={false} />
         </div>
       </div>
     </>
