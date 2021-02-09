@@ -3,7 +3,7 @@ import './chart.scss';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
-import { setSelectedRecord } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { setSelectedRecord, setNewRecord } from '../../../modules/gantt-chart-module/gantt-chart.slice';
 import { DealInterface, EmployeeInterface, ProvidedService } from '../../../core/models/auto-service.interface';
 
 export declare class ResizeObserver {
@@ -380,6 +380,11 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         // @ts-ignore
         const selectedDeal = deals.filter((deal: DealInterface) => deal.id.toString() === param.value[8])[0];
         dispatch(setSelectedRecord(selectedDeal));
+      }
+    });
+    chart.getZr().on('click', (params) => {
+      if (!params.target) {
+        dispatch(setNewRecord(true));
       }
     });
     resizeObserver.observe(eChart.current);

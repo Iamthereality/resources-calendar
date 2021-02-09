@@ -2,17 +2,19 @@ import React, { FC, MouseEvent } from 'react';
 import './modal-window.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
-import { resetSelectedRecord } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { resetSelectedRecord, resetNewRecord } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { NewRecord } from '../../../modules/gantt-chart-module/components/new-record/new-record';
 
 export const ModalWindow: FC = ({ children }): JSX.Element => {
   const dispatch = useDispatch();
-  const { selectedRecord } = useSelector((state: RootState) => state.ganttChart);
+  const { selectedRecord, newRecord } = useSelector((state: RootState) => state.ganttChart);
 
   const closeWindow = (): void => {
     dispatch(resetSelectedRecord());
+    dispatch(resetNewRecord());
   };
 
-  return Object.keys(selectedRecord).length > 0 ? (
+  return Object.keys(selectedRecord).length > 0 || newRecord ? (
     <div className='modal-window'>
       <div className='modal-window__overlay' onClick={closeWindow}>
         <div
@@ -21,9 +23,12 @@ export const ModalWindow: FC = ({ children }): JSX.Element => {
         >
           <div className='data-container'>
             <div className='modal-window__close' onClick={closeWindow} />
-            {Object.keys(selectedRecord).map((key: any) => (
-              <p key={key}>{`${key}: ${selectedRecord[key]}`}</p>
-            ))}
+
+            {newRecord ? (
+              <NewRecord />
+            ) : (
+              Object.keys(selectedRecord).map((key: any) => <p key={key}>{`${key}: ${selectedRecord[key]}`}</p>)
+            )}
           </div>
         </div>
       </div>
