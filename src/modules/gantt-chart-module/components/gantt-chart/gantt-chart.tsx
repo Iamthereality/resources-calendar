@@ -10,7 +10,9 @@ import { SideBar } from '../side-bar/side-bar';
 
 export const GantChart: FC = () => {
   const dispatch = useDispatch();
-  const { chartIsLoading, reloadChartData, sideBarState } = useSelector((state: RootState) => state.ganttChart);
+  const { chartIsLoading, reloadChartData, sideBarState, chartZoom } = useSelector(
+    (state: RootState) => state.ganttChart
+  );
 
   useEffect(() => {
     dispatch(getServiceResources());
@@ -41,10 +43,10 @@ export const GantChart: FC = () => {
         </div>
         <div className={sideBarState ? 'charts sidebar__open' : 'charts sidebar__closed'}>
           <div className='charts__top'>
-            <Chart chartTitle={'Приёмщики'} isAcceptor={true} />
+            <Chart chartTitle={'Приёмщики'} isAcceptor={true} chartZoom={chartZoom} />
           </div>
           <div className='charts__bottom'>
-            <Chart chartTitle={'Механики'} isAcceptor={false} />
+            <Chart chartTitle={'Механики'} isAcceptor={false} chartZoom={chartZoom} />
           </div>
         </div>
         {sideBarState ? <SideBar /> : null}

@@ -3,10 +3,11 @@ import './chart.scss';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
-import { openDeal } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { openDeal, setChartZoom } from '../../../modules/gantt-chart-module/gantt-chart.slice';
 import { DealInterface, EmployeeInterface, ProvidedService } from '../../../core/models/auto-service.interface';
+import { ChartZoomInterface } from '../../../core/models/gantt-chart.inteface';
 
-export declare class ResizeObserver {
+declare class ResizeObserver {
   observe(target: Element): void;
   unobserve(target: Element): void;
   disconnect(): void;
@@ -23,6 +24,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 interface Props {
   chartTitle: string;
   isAcceptor: boolean;
+  chartZoom: ChartZoomInterface;
 }
 
 interface ChartDataInterface {
@@ -36,14 +38,14 @@ interface ChartDataInterface {
   };
 }
 
-export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
+export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom }) => {
   const dispatch = useDispatch();
 
   const { acceptors, mechanics, providedServices, deals } = useSelector((state: RootState) => state.autoService);
 
   const eChart = useRef(null);
+  const chart = useRef(null);
 
-  const HEIGHT_RATIO = 0.6;
   const CATEGORY_INDEX = 0;
   const START_DATE = 6;
   const END_DATE = 7;
@@ -60,8 +62,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           shape: {
             d: 'M -30 0 L -30 -20 L 30 -20 C 42 -20 38 -1 50 -1 L 52 -1 L 52 0 Z',
             x: 0,
-            y: -20,
-            width: 180,
+            y: -40,
+            width: 190,
             height: 40,
             layout: 'cover'
           },
@@ -73,8 +75,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           type: 'text',
           style: {
             x: 80,
-            y: 0,
-            text: `${api.value(1)} ${api.value(2)} `,
+            y: -20,
+            text: `${api.value(1)} ${api.value(2)}`,
             textVerticalAlign: 'center',
             textAlign: 'center',
             textFill: '#fff'
@@ -85,7 +87,6 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
   };
 
   const clipRectByRect = (params, rect) => {
-    // @ts-ignore
     return echarts.graphic.clipRectByRect(rect, {
       x: params.coordSys.x,
       y: params.coordSys.y,
@@ -100,7 +101,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
     const endDate = api.coord([api.value(END_DATE), categoryIndex]);
 
     const barWidth = endDate[0] - startDate[0];
-    const barHeight = api.size([0, 1])[1] * HEIGHT_RATIO;
+    const barHeight = api.size([0, 1])[1] * 0.7 < 51 ? 50 : api.size([0, 1])[1] * 0.7;
     const x = startDate[0];
     const y = startDate[1] - barHeight;
 
@@ -123,17 +124,17 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
       height: barHeight
     });
 
-    const path = {
-      d:
-        'M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n' +
-        '\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n' +
-        '\t\tL129.007,57.819z',
-      x: 0,
-      y: 0,
-      width: 10,
-      height: 10,
-      layout: 'cover'
-    };
+    // const path = {
+    //   d:
+    //     'M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n' +
+    //     '\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n' +
+    //     '\t\tL129.007,57.819z',
+    //   x: x + barWidth/2 - 5,
+    //   y: y + barHeight/2 - 5,
+    //   width: 10,
+    //   height: 10,
+    //   layout: 'cover'
+    // };
 
     return {
       type: 'group',
@@ -155,13 +156,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
                   lineWidth: 2
                 }
         },
-        {
-          type: 'path',
-          shape: path,
-          style: {
-            fill: '#fff'
-          }
-        },
+        // {
+        //   type: 'path',
+        //   shape: path,
+        //   style: {
+        //     fill: '#000'
+        //   }
+        // },
         {
           type: 'rect',
           ignore: !rectText,
@@ -257,6 +258,11 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
   });
 
   useEffect(() => {
+    chart.current = echarts.init(eChart.current);
+    resizeObserver.observe(eChart.current);
+  }, []);
+
+  useEffect(() => {
     setChartData((state: ChartDataInterface) => ({
       employee: {
         dimensions: state.employee.dimensions,
@@ -267,8 +273,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         data: setDealsData()
       }
     }));
-    const chart = echarts.init(eChart.current);
-    chart.setOption({
+    chart.current.setOption({
       tooltip: {},
       animation: false,
       title: {
@@ -287,6 +292,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           type: 'inside',
           xAxisIndex: 0,
           minValueSpan: 3600,
+          start: chartZoom.start,
+          end: chartZoom.end,
           filterMode: 'weakFilter',
           showDetail: false,
           zoomOnMouseWheel: false,
@@ -295,7 +302,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         {
           type: 'slider',
           yAxisIndex: 0,
-          filterMode: 'weakFilter'
+          filterMode: 'weakFilter',
+          showDetail: false
         },
         {
           type: 'inside',
@@ -324,14 +332,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
             color: ['#E9EDFF']
           }
         },
-        axisLine: {
-          show: false
-        },
-        axisTick: {
-          lineStyle: {
-            color: '#929ABA'
-          }
-        },
+        axisLine: { show: false },
+        axisTick: { show: false },
         axisLabel: {
           color: '#929ABA',
           inside: false,
@@ -339,7 +341,6 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         }
       },
       yAxis: {
-        axisTick: { show: false },
         splitLine: {
           show: true,
           lineStyle: {
@@ -347,13 +348,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           }
         },
         axisLine: { show: false },
+        axisTick: { show: false },
         axisLabel: { show: false },
         min: 0,
         max: chartData.employee.data.length
       },
       series: [
         {
-          id: 'deals',
           type: 'custom',
           renderItem: renderGanttItem,
           dimensions: chartData.deal.dimensions,
@@ -377,21 +378,28 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         }
       ]
     });
-    chart.on('click', (param) => {
-      if (param) {
-        // @ts-ignore
-        const selectedDeal = deals.filter((deal: DealInterface) => deal.id === param.value[8])[0];
+    chart.current.on('click', (params) => {
+      if (params) {
+        const selectedDeal = deals.filter((deal: DealInterface) => deal.id === params.value[8])[0];
         dispatch(openDeal(selectedDeal));
       }
     });
-    chart.getZr().on('click', (params) => {
+    chart.current.getZr().on('click', (params) => {
       if (!params.target) {
         dispatch(openDeal(null));
       }
     });
-    resizeObserver.observe(eChart.current);
+    chart.current.on('dataZoom', (params) => {
+      // console.log(params);
+      dispatch(
+        setChartZoom({
+          start: params.start,
+          end: params.end
+        })
+      );
+    });
     // eslint-disable-next-line
-  }, [chartTitle, renderGanttItem, setEmployeesData, setDealsData, setChartData]);
+  }, [dispatch, chartTitle, chartZoom, renderGanttItem, setEmployeesData, setDealsData, setChartData, deals]);
 
   return <div ref={eChart} className='chart' />;
 };

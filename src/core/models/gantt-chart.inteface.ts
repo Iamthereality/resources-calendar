@@ -1,6 +1,4 @@
-export interface GanttChartRowInterface {
-  id: string;
-  index: number;
-  startDate: string;
-  endDate: string;
+export interface ChartZoomInterface {
+  start: number;
+  end: number;
 }

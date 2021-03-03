@@ -5,8 +5,10 @@ import { ActionsObservable, StateObservable } from 'redux-observable';
 import { RootState } from '../../core/store/root.reducer';
 import { concatMap, filter, switchMap, withLatestFrom } from 'rxjs/operators';
 import { addDeal, updateDeal } from '../../core/api/api.service';
+import { ChartZoomInterface } from '../../core/models/gantt-chart.inteface';
 
 interface GanttChartSliceInterface {
+  chartZoom: ChartZoomInterface;
   reloadChartData: boolean;
   onSaveLoading: boolean;
   chartIsLoading: boolean;
@@ -16,6 +18,7 @@ interface GanttChartSliceInterface {
 }
 
 const initialState: GanttChartSliceInterface = {
+  chartZoom: {} as ChartZoomInterface,
   reloadChartData: false,
   onSaveLoading: false,
   chartIsLoading: true,
@@ -28,6 +31,9 @@ export const ganttChartSlice = createSlice({
   name: 'ganttChartSlice',
   initialState,
   reducers: {
+    setChartZoom(state, action: PayloadAction<ChartZoomInterface>) {
+      state.chartZoom = action.payload;
+    },
     setChartIsLoading(state, action: PayloadAction<boolean>) {
       state.chartIsLoading = action.payload;
     },
@@ -66,7 +72,8 @@ export const {
   addNewDeal,
   updateSelectedDeal,
   setNewDeal,
-  setChartDataReloading
+  setChartDataReloading,
+  setChartZoom
 } = ganttChartSlice.actions;
 
 export const ganttChartReducer = ganttChartSlice.reducer;
