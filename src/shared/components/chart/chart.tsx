@@ -1,9 +1,9 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import './chart.scss';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
-import { setSelectedRecord, setNewRecord } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { openDeal } from '../../../modules/gantt-chart-module/gantt-chart.slice';
 import { DealInterface, EmployeeInterface, ProvidedService } from '../../../core/models/auto-service.interface';
 
 export declare class ResizeObserver {
@@ -144,15 +144,16 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           shape: rectNormal,
           style:
             api.value(2) === 'C1:WON'
-              ? api.style({
+              ? {
                   fill: '#36d18e',
                   stroke: '#fff',
                   lineWidth: 2
-                })
-              : api.style({
+                }
+              : {
+                  fill: '#4d70c3',
                   stroke: '#fff',
                   lineWidth: 2
-                })
+                }
         },
         {
           type: 'path',
@@ -165,12 +166,12 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
           type: 'rect',
           ignore: !rectText,
           shape: rectText,
-          style: api.style({
+          style: {
             fill: 'transparent',
             stroke: 'transparent',
             text: text,
             textFill: '#fff'
-          })
+          }
         }
       ]
     };
@@ -285,6 +286,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
         {
           type: 'inside',
           xAxisIndex: 0,
+          minValueSpan: 3600,
           filterMode: 'weakFilter',
           showDetail: false,
           zoomOnMouseWheel: false,
@@ -378,16 +380,17 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor }) => {
     chart.on('click', (param) => {
       if (param) {
         // @ts-ignore
-        const selectedDeal = deals.filter((deal: DealInterface) => deal.id.toString() === param.value[8])[0];
-        dispatch(setSelectedRecord(selectedDeal));
+        const selectedDeal = deals.filter((deal: DealInterface) => deal.id === param.value[8])[0];
+        dispatch(openDeal(selectedDeal));
       }
     });
     chart.getZr().on('click', (params) => {
       if (!params.target) {
-        dispatch(setNewRecord(true));
+        dispatch(openDeal(null));
       }
     });
     resizeObserver.observe(eChart.current);
+    // eslint-disable-next-line
   }, [chartTitle, renderGanttItem, setEmployeesData, setDealsData, setChartData]);
 
   return <div ref={eChart} className='chart' />;

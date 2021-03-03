@@ -42,3 +42,21 @@ export const getProvidedServices = (serviceId: string): Observable<ProvidedServi
     body: JSON.stringify({ serviceId })
   }).pipe(map((resp: AjaxResponse) => resp.response));
 };
+
+export const addDeal = (payload: string): Observable<any> => {
+  return ajax({
+    url: `${process.env.REACT_APP_API_URL}/add-deal.php`,
+    method: 'POST',
+    headers: requestHeaders,
+    body: payload
+  }).pipe(map((resp: AjaxResponse) => resp.response));
+};
+
+export const updateDeal = (payload: string): Observable<any> => {
+  return ajax({
+    url: `${process.env.REACT_APP_API_URL}/update-deal.php`,
+    method: 'POST',
+    headers: requestHeaders,
+    body: payload
+  }).pipe(map((resp: AjaxResponse) => resp.response));
+};

@@ -1,0 +1,8 @@
+.datetime-field {
+  width: 100%;
+  margin-bottom: 20px !important;
+
+  input::-webkit-calendar-picker-indicator {
+    cursor: pointer !important;
+  }
+}

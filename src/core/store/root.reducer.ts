@@ -10,7 +10,7 @@ import {
   AutoServiceProvidedServicesEpic,
   AutoServicesEpic
 } from '../../modules/auto-service-module/auto-service.slice';
-import { ganttChartReducer } from '../../modules/gantt-chart-module/gantt-chart.slice';
+import { AddDealEpic, ganttChartReducer, UpdateDealEpic } from '../../modules/gantt-chart-module/gantt-chart.slice';
 
 export const rootReducer = combineReducers({
   ganttChart: ganttChartReducer,
@@ -19,7 +19,14 @@ export const rootReducer = combineReducers({
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-const epics = [AutoServicesEpic, AutoServiceResourcesEpic, AutoServiceDealsEpic, AutoServiceProvidedServicesEpic];
+const epics = [
+  AutoServicesEpic,
+  AutoServiceResourcesEpic,
+  AutoServiceDealsEpic,
+  AutoServiceProvidedServicesEpic,
+  AddDealEpic,
+  UpdateDealEpic
+];
 
 export const rootEpic: AppEpic = (
   action$: ActionsObservable<AnyAction>,

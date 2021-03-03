@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import './app.scss';
 import { GantChart } from '../../../gantt-chart-module/components/gantt-chart/gantt-chart';
 import { AutoServiceSelection } from '../../../auto-service-module/components/auto-service-selection/auto-service-selection';

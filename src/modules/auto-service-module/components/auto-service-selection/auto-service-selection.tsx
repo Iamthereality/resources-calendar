@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import './auto-service-selection.scss';
 import { RootState } from '../../../../core/store/root.reducer';
 import { useDispatch, useSelector } from 'react-redux';
