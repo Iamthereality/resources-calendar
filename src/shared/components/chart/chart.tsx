@@ -3,7 +3,7 @@ import './chart.scss';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
-import { openDeal, setChartZoom } from '../../../modules/gantt-chart-module/gantt-chart.slice';
+import { openDeal } from '../../../modules/gantt-chart-module/gantt-chart.slice';
 import { DealInterface, EmployeeInterface, ProvidedService } from '../../../core/models/auto-service.interface';
 import { ChartZoomInterface } from '../../../core/models/gantt-chart.inteface';
 
@@ -25,6 +25,7 @@ interface Props {
   chartTitle: string;
   isAcceptor: boolean;
   chartZoom: ChartZoomInterface;
+  setChartZoom: (start: number, end: number) => void;
 }
 
 interface ChartDataInterface {
@@ -38,7 +39,7 @@ interface ChartDataInterface {
   };
 }
 
-export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom }) => {
+export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZoom }) => {
   const dispatch = useDispatch();
 
   const { acceptors, mechanics, providedServices, deals } = useSelector((state: RootState) => state.autoService);
@@ -259,8 +260,33 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom }) => {
 
   useEffect(() => {
     chart.current = echarts.init(eChart.current);
+    chart.current.on('dataZoom', (params) => {
+      const zoomId = (dataZoomId): string => {
+        let id = '';
+        for (let i = 0; i < dataZoomId.length; i++) {
+          if (dataZoomId.charCodeAt(i) !== 0) {
+            id += dataZoomId.charAt(i);
+          }
+        }
+        return id;
+      };
+
+      if (params.hasOwnProperty('batch')) {
+        if (params.batch[0].hasOwnProperty('dataZoomId')) {
+          if (zoomId(params.batch[0].dataZoomId) === 'series20') {
+            setChartZoom(params.batch[0].start, params.batch[0].end);
+          }
+        }
+      } else {
+        if (params.hasOwnProperty('dataZoomId')) {
+          if (zoomId(params.dataZoomId) === 'series00') {
+            setChartZoom(params.start, params.end);
+          }
+        }
+      }
+    });
     resizeObserver.observe(eChart.current);
-  }, []);
+  }, [setChartZoom]);
 
   useEffect(() => {
     setChartData((state: ChartDataInterface) => ({
@@ -284,26 +310,25 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom }) => {
         {
           type: 'slider',
           xAxisIndex: 0,
-          filterMode: 'weakFilter',
-          showDetail: false,
-          minSpan: 10
-        },
-        {
-          type: 'inside',
-          xAxisIndex: 0,
-          minValueSpan: 3600,
           start: chartZoom.start,
           end: chartZoom.end,
           filterMode: 'weakFilter',
-          showDetail: false,
-          zoomOnMouseWheel: false,
-          moveOnMouseMove: true
+          showDetail: false
         },
         {
           type: 'slider',
           yAxisIndex: 0,
           filterMode: 'weakFilter',
           showDetail: false
+        },
+        {
+          type: 'inside',
+          xAxisIndex: 0,
+          minValueSpan: 3600,
+          filterMode: 'weakFilter',
+          showDetail: false,
+          zoomOnMouseWheel: false,
+          moveOnMouseMove: true
         },
         {
           type: 'inside',
@@ -389,17 +414,23 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom }) => {
         dispatch(openDeal(null));
       }
     });
-    chart.current.on('dataZoom', (params) => {
-      // console.log(params);
-      dispatch(
-        setChartZoom({
-          start: params.start,
-          end: params.end
-        })
-      );
-    });
     // eslint-disable-next-line
-  }, [dispatch, chartTitle, chartZoom, renderGanttItem, setEmployeesData, setDealsData, setChartData, deals]);
+  }, [dispatch, chartTitle, renderGanttItem, setEmployeesData, setDealsData, setChartData, deals]);
+
+  useEffect(() => {
+    chart.current.setOption({
+      dataZoom: [
+        {
+          xAxisIndex: 0,
+          start: chartZoom.start,
+          end: chartZoom.end
+        },
+        {
+          yAxisIndex: 0
+        }
+      ]
+    });
+  }, [chartZoom]);
 
   return <div ref={eChart} className='chart' />;
 };

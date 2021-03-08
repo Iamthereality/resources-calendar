@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import './gantt-chart.scss';
 import { Chart } from '../../../../shared/components/chart/chart';
 import { getServiceResources, resetSelectedAutoService } from '../../../auto-service-module/auto-service.slice';
@@ -7,16 +7,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store/root.reducer';
 import { LoadingIndicator } from '../../../../shared/components/loading-indicator/loading-indicator';
 import { SideBar } from '../side-bar/side-bar';
+import { ChartZoomInterface } from '../../../../core/models/gantt-chart.inteface';
 
 export const GantChart: FC = () => {
   const dispatch = useDispatch();
-  const { chartIsLoading, reloadChartData, sideBarState, chartZoom } = useSelector(
-    (state: RootState) => state.ganttChart
-  );
+  const { chartIsLoading, reloadChartData, sideBarState } = useSelector((state: RootState) => state.ganttChart);
+
+  const [chartZoom, setZoom] = useState<ChartZoomInterface>({
+    start: 0,
+    end: 5
+  });
 
   useEffect(() => {
     dispatch(getServiceResources());
   }, [dispatch, reloadChartData]);
+
+  const setChartZoom = useCallback((start: number, end: number): void => {
+    setZoom({ start, end });
+  }, []);
 
   return chartIsLoading ? (
     <LoadingIndicator />
@@ -43,10 +51,10 @@ export const GantChart: FC = () => {
         </div>
         <div className={sideBarState ? 'charts sidebar__open' : 'charts sidebar__closed'}>
           <div className='charts__top'>
-            <Chart chartTitle={'Приёмщики'} isAcceptor={true} chartZoom={chartZoom} />
+            <Chart chartTitle={'Приёмщики'} isAcceptor={true} chartZoom={chartZoom} setChartZoom={setChartZoom} />
           </div>
           <div className='charts__bottom'>
-            <Chart chartTitle={'Механики'} isAcceptor={false} chartZoom={chartZoom} />
+            <Chart chartTitle={'Механики'} isAcceptor={false} chartZoom={chartZoom} setChartZoom={setChartZoom} />
           </div>
         </div>
         {sideBarState ? <SideBar /> : null}
