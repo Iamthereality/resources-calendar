@@ -3,12 +3,17 @@ export interface AutoServiceInterface {
   address: string;
 }
 
+export interface EmployeeScheduleInterface {
+  from: string;
+  to: string;
+}
+
 export interface EmployeeInterface {
   id: string;
   name: string;
   surname: string;
   lastName: string;
-  schedule: [];
+  schedule: EmployeeScheduleInterface[];
   serviceType?: string;
 }
 

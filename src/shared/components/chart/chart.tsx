@@ -4,7 +4,12 @@ import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store/root.reducer';
 import { openDeal } from '../../../modules/gantt-chart-module/gantt-chart.slice';
-import { DealInterface, EmployeeInterface, ProvidedService } from '../../../core/models/auto-service.interface';
+import {
+  DealInterface,
+  EmployeeInterface,
+  EmployeeScheduleInterface,
+  ProvidedService
+} from '../../../core/models/auto-service.interface';
 import { ChartZoomInterface } from '../../../core/models/gantt-chart.inteface';
 
 declare class ResizeObserver {
@@ -30,13 +35,18 @@ interface Props {
 
 interface ChartDataInterface {
   employee: {
-    dimensions: any[];
+    dimensions: string[];
     data: any[];
   };
   deal: {
-    dimensions: any[];
+    dimensions: string[];
     data: any[];
   };
+}
+
+interface DaysOffInterface {
+  dimensions: string[];
+  data: any[];
 }
 
 export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZoom }) => {
@@ -96,93 +106,129 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
     });
   };
 
-  const renderGanttItem = useCallback((params, api) => {
-    const categoryIndex = api.value(CATEGORY_INDEX);
-    const startDate = api.coord([api.value(START_DATE), categoryIndex]);
-    const endDate = api.coord([api.value(END_DATE), categoryIndex]);
+  const renderRecord = useCallback(
+    (params, api, { index, start, end }, isDayOff?: boolean) => {
+      const categoryIndex = api.value(index);
+      const startDate = api.coord([api.value(start), categoryIndex]);
+      const endDate = api.coord([api.value(end), categoryIndex]);
 
-    const barWidth = endDate[0] - startDate[0];
-    const barHeight = api.size([0, 1])[1] * 0.7 < 51 ? 50 : api.size([0, 1])[1] * 0.7;
-    const x = startDate[0];
-    const y = startDate[1] - barHeight;
+      const barWidth = endDate[0] - startDate[0];
+      const barHeight = api.size([0, 1])[1] * 0.7 < 51 ? 50 : api.size([0, 1])[1] * 0.7;
+      const x = startDate[0];
+      const y = startDate[1] - barHeight;
 
-    const title = api.value(1) + '';
-    // @ts-ignore
-    const titleWidth = echarts.format.getTextRect(title).width;
-    const text = barWidth > titleWidth + 40 && x + barWidth >= 180 ? title : '';
+      const title = api.value(1);
+      // @ts-ignore
+      const titleWidth = echarts.format.getTextRect(title).width;
+      const text =
+        barWidth > titleWidth + 40 && x + barWidth >= 180
+          ? !isDayOff
+            ? isAcceptor
+              ? '\u2191'
+              : title
+            : 'Выходной'
+          : '';
 
-    const rectNormal = clipRectByRect(params, {
-      x: x,
-      y: y,
-      width: barWidth,
-      height: barHeight
-    });
+      const rectNormal = clipRectByRect(params, {
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight
+      });
 
-    const rectText = clipRectByRect(params, {
-      x: x,
-      y: y,
-      width: barWidth,
-      height: barHeight
-    });
+      const rectText = clipRectByRect(params, {
+        x: x,
+        y: y,
+        width: barWidth,
+        height: barHeight
+      });
 
-    // const path = {
-    //   d:
-    //     'M129.007,57.819c-4.68-4.68-12.499-4.68-17.191,0L3.555,165.803c-4.74,4.74-4.74,12.427,0,17.155\n' +
-    //     '\t\tc4.74,4.74,12.439,4.74,17.179,0l99.683-99.406l99.671,99.418c4.752,4.74,12.439,4.74,17.191,0c4.74-4.74,4.74-12.427,0-17.155\n' +
-    //     '\t\tL129.007,57.819z',
-    //   x: x + barWidth/2 - 5,
-    //   y: y + barHeight/2 - 5,
-    //   width: 10,
-    //   height: 10,
-    //   layout: 'cover'
-    // };
-
-    return {
-      type: 'group',
-      children: [
-        {
-          type: 'rect',
-          ignore: !rectNormal,
-          shape: rectNormal,
-          style:
-            api.value(2) === 'C1:WON'
-              ? {
-                  fill: '#36d18e',
-                  stroke: '#fff',
-                  lineWidth: 2
-                }
-              : {
-                  fill: '#4d70c3',
-                  stroke: '#fff',
-                  lineWidth: 2
-                }
-        },
-        // {
-        //   type: 'path',
-        //   shape: path,
-        //   style: {
-        //     fill: '#000'
-        //   }
-        // },
-        {
-          type: 'rect',
-          ignore: !rectText,
-          shape: rectText,
-          style: {
-            fill: 'transparent',
-            stroke: 'transparent',
-            text: text,
-            textFill: '#fff'
+      return {
+        type: 'group',
+        children: [
+          {
+            type: 'rect',
+            ignore: !rectNormal,
+            shape: rectNormal,
+            style:
+              api.value(2) === 'C1:WON'
+                ? {
+                    fill: '#36d18e',
+                    stroke: '#fff',
+                    lineWidth: 2
+                  }
+                : {
+                    fill: isDayOff ? 'rgba(0, 0, 0, 0.25)' : '#4d70c3',
+                    stroke: '#fff',
+                    lineWidth: 2
+                  }
+          },
+          {
+            type: 'rect',
+            ignore: !rectText,
+            shape: rectText,
+            style: {
+              fill: 'transparent',
+              stroke: 'transparent',
+              text: text,
+              textFill: '#fff'
+            }
           }
-        }
-      ]
-    };
-  }, []);
+        ]
+      };
+    },
+    [isAcceptor]
+  );
+
+  const renderDaysOff = useCallback(
+    (params, api) => {
+      return renderRecord(params, api, { index: 0, start: 3, end: 4 }, true);
+    },
+    [renderRecord]
+  );
+
+  const renderGanttItem = useCallback(
+    (params, api) => {
+      return renderRecord(params, api, { index: CATEGORY_INDEX, start: START_DATE, end: END_DATE });
+    },
+    [renderRecord]
+  );
 
   const setEmployeesData = useCallback((): any[] => {
     return isAcceptor
       ? acceptors.map((employee: EmployeeInterface, index: number) => [index, employee.name, employee.lastName])
       : mechanics.map((employee: EmployeeInterface, index: number) => [index, employee.name, employee.lastName]);
+  }, [acceptors, mechanics, isAcceptor]);
+
+  const setDaysOff = useCallback(() => {
+    const formatDate = (date: string): Date => {
+      const dateParts = date.split('.');
+      return new Date(+dateParts[2], +dateParts[1] - 1, +dateParts[0]);
+    };
+
+    return isAcceptor
+      ? acceptors
+          .map((employee: EmployeeInterface, index: number) => [
+            employee.schedule.map((dayOff: EmployeeScheduleInterface) => [
+              index,
+              employee.name,
+              employee.lastName,
+              formatDate(dayOff.from),
+              formatDate(dayOff.to)
+            ])
+          ])
+          .flat()
+      : mechanics
+          .map((employee: EmployeeInterface, index: number) => [
+            employee.schedule.map((dayOff: EmployeeScheduleInterface) => [
+              index,
+              employee.name,
+              employee.lastName,
+              formatDate(dayOff.from),
+              formatDate(dayOff.to)
+            ])
+          ])
+          .flat();
   }, [acceptors, mechanics, isAcceptor]);
 
   const setDealsData = useCallback((): any[] => {
@@ -206,8 +252,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
           `${mechanic.name} ${mechanic.lastName}`,
           service.name
         ];
-        const start = [...commonFields, Date.parse(deal.start), Date.parse(deal.start) + 900000, deal.id];
-        const end = [...commonFields, Date.parse(deal.end) - 900000, Date.parse(deal.end), deal.id];
+        const start = [...commonFields, Date.parse(deal.accept), Date.parse(deal.accept) + 600000, deal.id];
+        const end = [...commonFields, Date.parse(deal.release) - 600000, Date.parse(deal.release), deal.id];
         acceptorDeals.push(start, end);
       });
       return acceptorDeals;
@@ -257,6 +303,10 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       data: setDealsData()
     }
   });
+  const [daysOffData, setDaysOffData] = useState<DaysOffInterface>({
+    dimensions: ['index', 'Имя', 'Фамилия', 'Выходной с:', 'Выходной по:'],
+    data: setDaysOff().flat()
+  });
 
   useEffect(() => {
     chart.current = echarts.init(eChart.current);
@@ -285,8 +335,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         }
       }
     });
+    chart.current.getZr().on('click', (params) => {
+      if (!params.target) {
+        dispatch(openDeal(null));
+      }
+    });
     resizeObserver.observe(eChart.current);
-  }, [setChartZoom]);
+  }, [dispatch, setChartZoom]);
 
   useEffect(() => {
     setChartData((state: ChartDataInterface) => ({
@@ -381,6 +436,17 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       series: [
         {
           type: 'custom',
+          renderItem: renderDaysOff,
+          dimensions: daysOffData.dimensions,
+          encode: {
+            x: [3, 4],
+            y: 0,
+            tooltip: [1, 2, 3, 4]
+          },
+          data: daysOffData.data
+        },
+        {
+          type: 'custom',
           renderItem: renderGanttItem,
           dimensions: chartData.deal.dimensions,
           encode: {
@@ -407,11 +473,6 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       if (params) {
         const selectedDeal = deals.filter((deal: DealInterface) => deal.id === params.value[8])[0];
         dispatch(openDeal(selectedDeal));
-      }
-    });
-    chart.current.getZr().on('click', (params) => {
-      if (!params.target) {
-        dispatch(openDeal(null));
       }
     });
     // eslint-disable-next-line
