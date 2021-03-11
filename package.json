@@ -1,7 +1,7 @@
 {
   "name": "resources-calendar",
   "homepage": "https://bm.it-building24.ru/calendar/app/",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.3",
