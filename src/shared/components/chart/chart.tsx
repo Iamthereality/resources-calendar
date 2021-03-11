@@ -31,6 +31,8 @@ interface Props {
   isAcceptor: boolean;
   chartZoom: ChartZoomInterface;
   setChartZoom: (start: number, end: number) => void;
+  dealId: string;
+  setDealId: (id: string | null) => void;
 }
 
 interface ChartDataInterface {
@@ -49,7 +51,7 @@ interface DaysOffInterface {
   data: any[];
 }
 
-export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZoom }) => {
+export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZoom, dealId, setDealId }) => {
   const dispatch = useDispatch();
 
   const { acceptors, mechanics, providedServices, deals } = useSelector((state: RootState) => state.autoService);
@@ -121,7 +123,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       // @ts-ignore
       const titleWidth = echarts.format.getTextRect(title).width;
       const text =
-        barWidth > titleWidth + 40 && x + barWidth >= 180
+        barWidth > titleWidth + 20 && x + barWidth >= 180
           ? !isDayOff
             ? isAcceptor
               ? '\u2191'
@@ -152,15 +154,21 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
             shape: rectNormal,
             style:
               api.value(2) === 'C1:WON'
+                ? { fill: '#36d18e' }
+                : +dealId === api.value(8)
                 ? {
-                    fill: '#36d18e',
-                    stroke: '#fff',
-                    lineWidth: 2
+                    fill: '#ffae00',
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(0, 0, 0, 0.3)'
                   }
                 : {
-                    fill: isDayOff ? 'rgba(0, 0, 0, 0.25)' : '#4d70c3',
-                    stroke: '#fff',
-                    lineWidth: 2
+                    fill: isDayOff
+                      ? 'rgba(0, 0, 0, 0.25)'
+                      : api.value(9) === 'accept'
+                      ? '#ff0080'
+                      : api.value(9) === 'release'
+                      ? '#9d00ff'
+                      : '#4d70c3'
                   }
           },
           {
@@ -171,13 +179,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
               fill: 'transparent',
               stroke: 'transparent',
               text: text,
-              textFill: '#fff'
+              textFill: +dealId === api.value(8) ? '#000' : '#fff'
             }
           }
         ]
       };
     },
-    [isAcceptor]
+    [isAcceptor, dealId]
   );
 
   const renderDaysOff = useCallback(
@@ -252,8 +260,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
           `${mechanic.name} ${mechanic.lastName}`,
           service.name
         ];
-        const start = [...commonFields, Date.parse(deal.accept), Date.parse(deal.accept) + 600000, deal.id];
-        const end = [...commonFields, Date.parse(deal.release) - 600000, Date.parse(deal.release), deal.id];
+        const start = [...commonFields, Date.parse(deal.accept), Date.parse(deal.accept) + 600000, deal.id, 'accept'];
+        const end = [...commonFields, Date.parse(deal.release) - 600000, Date.parse(deal.release), deal.id, 'release'];
         acceptorDeals.push(start, end);
       });
       return acceptorDeals;
@@ -277,7 +285,8 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
           service.name,
           new Date(deal.start),
           new Date(deal.end),
-          deal.id
+          deal.id,
+          'service'
         ];
       });
     }
@@ -298,11 +307,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         'Услуга',
         'Начало обслуживания',
         'Конец обслуживания',
-        'id'
+        'id',
+        'stage'
       ],
       data: setDealsData()
     }
   });
+
   const [daysOffData, setDaysOffData] = useState<DaysOffInterface>({
     dimensions: ['index', 'Имя', 'Фамилия', 'Выходной с:', 'Выходной по:'],
     data: setDaysOff().flat()
@@ -310,6 +321,16 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
 
   useEffect(() => {
     chart.current = echarts.init(eChart.current);
+    chart.current.on('mouseover', (params) => {
+      if (params.value[8]) {
+        setDealId(params.value[8]);
+      }
+    });
+    chart.current.on('mouseout', (params) => {
+      if (params.value[8]) {
+        setDealId(null);
+      }
+    });
     chart.current.on('dataZoom', (params) => {
       const zoomId = (dataZoomId): string => {
         let id = '';
@@ -341,7 +362,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       }
     });
     resizeObserver.observe(eChart.current);
-  }, [dispatch, setChartZoom]);
+  }, [dispatch, setChartZoom, setDealId]);
 
   useEffect(() => {
     setChartData((state: ChartDataInterface) => ({
@@ -353,6 +374,10 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         dimensions: state.deal.dimensions,
         data: setDealsData()
       }
+    }));
+    setDaysOffData((state: DaysOffInterface) => ({
+      dimensions: state.dimensions,
+      data: setDaysOff().flat()
     }));
     chart.current.setOption({
       tooltip: {},
@@ -452,7 +477,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
           encode: {
             x: [START_DATE, END_DATE],
             y: CATEGORY_INDEX,
-            tooltip: [1, 2, 3, 4, 5, 6, 7]
+            tooltip: [1, 3, 4, 5, 6, 7]
           },
           data: chartData.deal.data
         },
@@ -476,7 +501,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       }
     });
     // eslint-disable-next-line
-  }, [dispatch, chartTitle, renderGanttItem, setEmployeesData, setDealsData, setChartData, deals]);
+  }, [dispatch, chartTitle, renderGanttItem, setEmployeesData, setDealsData, setChartData, setDaysOffData, deals]);
 
   useEffect(() => {
     chart.current.setOption({

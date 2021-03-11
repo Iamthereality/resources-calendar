@@ -18,12 +18,18 @@ export const GantChart: FC = () => {
     end: 5
   });
 
+  const [dealId, setId] = useState<string | null>(null);
+
   useEffect(() => {
     dispatch(getServiceResources());
   }, [dispatch, reloadChartData]);
 
   const setChartZoom = useCallback((start: number, end: number): void => {
     setZoom({ start, end });
+  }, []);
+
+  const setDealId = useCallback((id: string | null): void => {
+    setId(id);
   }, []);
 
   return chartIsLoading ? (
@@ -51,10 +57,24 @@ export const GantChart: FC = () => {
         </div>
         <div className={sideBarState ? 'charts sidebar__open' : 'charts sidebar__closed'}>
           <div className='charts__top'>
-            <Chart chartTitle={'Приёмщики'} isAcceptor={true} chartZoom={chartZoom} setChartZoom={setChartZoom} />
+            <Chart
+              chartTitle={'Приёмщики'}
+              isAcceptor={true}
+              chartZoom={chartZoom}
+              setChartZoom={setChartZoom}
+              dealId={dealId}
+              setDealId={setDealId}
+            />
           </div>
           <div className='charts__bottom'>
-            <Chart chartTitle={'Механики'} isAcceptor={false} chartZoom={chartZoom} setChartZoom={setChartZoom} />
+            <Chart
+              chartTitle={'Механики'}
+              isAcceptor={false}
+              chartZoom={chartZoom}
+              setChartZoom={setChartZoom}
+              dealId={dealId}
+              setDealId={setDealId}
+            />
           </div>
         </div>
         {sideBarState ? <SideBar /> : null}
