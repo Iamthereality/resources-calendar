@@ -315,7 +315,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
   });
 
   const [daysOffData, setDaysOffData] = useState<DaysOffInterface>({
-    dimensions: ['index', 'Имя', 'Фамилия', 'Выходной с:', 'Выходной по:'],
+    dimensions: ['index', 'Имя', 'Фамилия', 'Выходной с', 'Выходной по'],
     data: setDaysOff().flat()
   });
 
@@ -380,7 +380,41 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       data: setDaysOff().flat()
     }));
     chart.current.setOption({
-      tooltip: {},
+      tooltip: {
+        formatter: (params) => {
+          const dimensions: any[] = [];
+          const values: any[] = [];
+          params.dimensionNames.forEach((dimension: string, index: number) => {
+            if (dimension !== 'index' && dimension !== 'Стату сделки' && dimension !== 'id' && dimension !== 'stage') {
+              values.push(params.value[index]);
+              dimensions.push(dimension);
+            }
+          });
+          if (params.seriesName === 'deals') {
+            const start = new Date(values[4]);
+            const end = new Date(values[5]);
+            values[4] = `${start.toLocaleDateString('ru-RU')} ${start.getHours()}:${
+              start.getMinutes() < 10 ? '0' + start.getMinutes() : start.getMinutes()
+            }`;
+            values[5] = `${end.toLocaleDateString('ru-RU')} ${end.getHours()}:${
+              end.getMinutes() < 10 ? '0' + end.getMinutes() : end.getMinutes()
+            }`;
+          }
+          if (params.seriesName === 'daysOff') {
+            const start = new Date(values[2]);
+            const end = new Date(values[3]);
+            values[2] = `${start.toLocaleDateString('ru-RU')}`;
+            values[3] = `${end.toLocaleDateString('ru-RU')}`;
+          }
+          return `
+            ${dimensions.map((dimension: string, index: number) => {
+              return index === 0
+                ? `<b>${dimension}</b>: ${values[index]}`
+                : `<br/><b>${dimension}</b>: ${values[index]}`;
+            })}
+          `;
+        }
+      },
       animation: false,
       title: {
         text: chartTitle,
@@ -461,6 +495,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
       series: [
         {
           type: 'custom',
+          name: 'daysOff',
           renderItem: renderDaysOff,
           dimensions: daysOffData.dimensions,
           encode: {
@@ -472,6 +507,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         },
         {
           type: 'custom',
+          name: 'deals',
           renderItem: renderGanttItem,
           dimensions: chartData.deal.dimensions,
           encode: {
@@ -483,12 +519,13 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         },
         {
           type: 'custom',
+          name: 'labels',
           renderItem: renderAxisLabelItem,
           dimensions: chartData.employee.dimensions,
           encode: {
-            tooltip: [1, 2],
             x: -1,
-            y: 0
+            y: 0,
+            tooltip: [1, 2]
           },
           data: chartData.employee.data
         }
