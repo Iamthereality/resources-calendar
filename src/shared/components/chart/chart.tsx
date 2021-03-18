@@ -467,9 +467,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         position: 'top',
         splitLine: {
           show: true,
-          lineStyle: {
-            color: ['#E9EDFF']
-          }
+          lineStyle: { color: ['#E9EDFF'] }
         },
         axisLine: { show: false },
         axisTick: { show: false },
