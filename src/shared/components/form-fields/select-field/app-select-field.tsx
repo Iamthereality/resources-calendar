@@ -3,6 +3,7 @@ import './app-select-field.scss';
 import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 import { setNewDeal } from '../../../../modules/gantt-chart-module/gantt-chart.slice';
+import { Record } from '../../../../core/models/gantt-chart.inteface';
 
 interface Option {
   id: string;
@@ -14,10 +15,20 @@ interface Props {
   label: string;
   options: Option[];
   defaultValue: string;
+  disabled?: boolean;
+  callback?: (value: any) => void;
   error?: boolean;
 }
 
-export const AppSelectField: FC<Props> = ({ controlName, label, options, defaultValue, error }): JSX.Element => {
+export const AppSelectField: FC<Props> = ({
+  controlName,
+  label,
+  options,
+  defaultValue,
+  disabled,
+  callback,
+  error
+}): JSX.Element => {
   const dispatch = useDispatch();
   const [value, setValue] = useState<string>(defaultValue);
 
@@ -34,6 +45,16 @@ export const AppSelectField: FC<Props> = ({ controlName, label, options, default
     );
   }, [dispatch, value, controlName]);
 
+  useEffect(() => {
+    if (callback) {
+      callback((state: Record) => {
+        const newState = { ...state };
+        newState[controlName] = value;
+        return newState;
+      });
+    }
+  }, [value, callback]);
+
   const onValueChange = (event: ChangeEvent<HTMLSelectElement>): void => {
     setValue(event.target.value);
   };
@@ -43,6 +64,7 @@ export const AppSelectField: FC<Props> = ({ controlName, label, options, default
       <FormControl variant={'outlined'} className='select-field'>
         <InputLabel htmlFor={controlName}>{label}</InputLabel>
         <Select
+          disabled={disabled}
           label={label}
           value={value}
           onChange={onValueChange}

@@ -71,6 +71,9 @@ export const autoServiceSlice = createSlice({
       state.deals = action.payload;
       state.loading = false;
     },
+    updateAutoServiceDeals(state, action: PayloadAction<DealInterface>) {
+      state.deals.push(action.payload);
+    },
     getAutoServiceProvidedServices(state) {
       state.loading = true;
     },
@@ -96,7 +99,8 @@ export const {
   getAutoServiceProvidedServices,
   setAutoServiceProvidedServices,
   getAutoServiceDeals,
-  setAutoServiceDeals
+  setAutoServiceDeals,
+  updateAutoServiceDeals
 } = autoServiceSlice.actions;
 
 export const autoServiceReducer = autoServiceSlice.reducer;

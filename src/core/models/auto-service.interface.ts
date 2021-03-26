@@ -23,17 +23,15 @@ export interface ResourcesInterface {
 }
 
 export interface DealInterface {
-  id: string;
-  title: string;
+  id?: string;
+  title?: string;
   leadId?: string;
-  providedServiceId: number;
-  acceptorId: number;
-  mechanicId: number;
-  accept: string;
-  release: string;
-  start: string;
-  end: string;
-  status: string;
+  providedServiceId?: number;
+  acceptorId?: number;
+  mechanicId?: number;
+  accept?: string;
+  release?: string;
+  status?: string;
 }
 
 export interface ProvidedService {

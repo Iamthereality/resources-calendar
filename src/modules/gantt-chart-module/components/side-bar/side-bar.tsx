@@ -1,17 +1,38 @@
-import { MouseEvent, FC } from 'react';
+import { MouseEvent, FC, useState, useEffect } from 'react';
 import './side-bar.scss';
 import { useDispatch, useSelector } from 'react-redux';
 import { closeDeal, updateSelectedDeal, addNewDeal } from '../../gantt-chart.slice';
+import { updateAutoServiceDeals } from '../../../auto-service-module/auto-service.slice';
 import { RootState } from '../../../../core/store/root.reducer';
 import { AppSelectField } from '../../../../shared/components/form-fields/select-field/app-select-field';
 import { DealInterface, EmployeeInterface, ProvidedService } from '../../../../core/models/auto-service.interface';
-import { AppDatetimeField } from '../../../../shared/components/form-fields/datetime-field/app-datetime-field';
 import { AppTextField } from '../../../../shared/components/form-fields/text-field/app-text-field';
+import { FormGroup } from '../form-group/form-group';
+import { Record } from '../../../../core/models/gantt-chart.inteface';
 
 export const SideBar: FC = (): JSX.Element => {
   const dispatch = useDispatch();
   const { deal } = useSelector((state: RootState) => state.ganttChart);
   const { providedServices, acceptors, mechanics, deals } = useSelector((state: RootState) => state.autoService);
+
+  const [acceptor, setAcceptor] = useState<Record>({} as Record);
+
+  useEffect(() => {
+    console.log(acceptor);
+    if (acceptor.acceptorId) {
+      if (acceptor.acceptorId.length > 0) {
+        console.log(deals[0]);
+        // const halfOfAnHour = 1000 * 60 * 30;
+        // const now = new Date().getTime();
+        // const accept = now - halfOfAnHour;
+        // const release = now + halfOfAnHour;
+        // dispatch(updateAutoServiceDeals({
+        //   accept: accept.toString(),
+        //   release: release.toString()
+        // } as DealInterface));
+      }
+    }
+  }, [acceptor]);
 
   const closeSidebar = (): void => {
     dispatch(closeDeal());
@@ -35,7 +56,7 @@ export const SideBar: FC = (): JSX.Element => {
         <div className='sidebar__header__info'>
           <div className='sidebar__header__info-title'>{deal ? deal.title : 'Новая запись'}</div>
           <div onClick={closeSidebar} className='sidebar__header__info-close'>
-            X
+            {'X'}
           </div>
         </div>
         {deal ? (
@@ -53,18 +74,6 @@ export const SideBar: FC = (): JSX.Element => {
         <form className='sidebar__body-form'>
           {!deal ? <AppTextField controlName={'leadId'} label={'ID лида'} /> : null}
           <AppSelectField
-            controlName={'providedServiceId'}
-            label={'Услуга'}
-            options={providedServices}
-            defaultValue={
-              deal
-                ? providedServices.filter(
-                    (service: ProvidedService) => service.id === deal.providedServiceId.toString()
-                  )[0].id
-                : ''
-            }
-          />
-          <AppSelectField
             controlName={'acceptorId'}
             label={'Приёмщик'}
             options={makeOptionsOf(acceptors)}
@@ -73,44 +82,14 @@ export const SideBar: FC = (): JSX.Element => {
                 ? acceptors.filter((acceptor: EmployeeInterface) => acceptor.id === deal.acceptorId.toString())[0].id
                 : ''
             }
+            callback={setAcceptor}
           />
-          <AppSelectField
-            controlName={'mechanicId'}
-            label={'Механик'}
+          <FormGroup
+            disabled={!acceptor.acceptorId}
+            providedServices={providedServices}
+            deal={deal}
+            mechanics={mechanics}
             options={makeOptionsOf(mechanics)}
-            defaultValue={
-              deal
-                ? mechanics.filter((mechanic: EmployeeInterface) => mechanic.id === deal.mechanicId.toString())[0].id
-                : ''
-            }
-          />
-          <AppDatetimeField
-            controlName={'accept'}
-            label={'Приём автомобиля'}
-            defaultValue={
-              deal ? deals.filter((savedDeal: DealInterface) => savedDeal.id === deal.id)[0].accept.slice(0, 16) : ''
-            }
-          />
-          <AppDatetimeField
-            controlName={'start'}
-            label={'Начало обслуживания'}
-            defaultValue={
-              deal ? deals.filter((savedDeal: DealInterface) => savedDeal.id === deal.id)[0].start.slice(0, 16) : ''
-            }
-          />
-          <AppDatetimeField
-            controlName={'end'}
-            label={'Конец обслуживания'}
-            defaultValue={
-              deal ? deals.filter((savedDeal: DealInterface) => savedDeal.id === deal.id)[0].end.slice(0, 16) : ''
-            }
-          />
-          <AppDatetimeField
-            controlName={'release'}
-            label={'Выдача автомобиля'}
-            defaultValue={
-              deal ? deals.filter((savedDeal: DealInterface) => savedDeal.id === deal.id)[0].release.slice(0, 16) : ''
-            }
           />
           <button className='save' onClick={saveDeal}>
             Сохранить

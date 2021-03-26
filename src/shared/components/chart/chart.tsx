@@ -356,7 +356,7 @@ export const Chart: FC<Props> = ({ chartTitle, isAcceptor, chartZoom, setChartZo
         }
       }
     });
-    chart.current.getZr().on('click', (params) => {
+    chart.current.getZr().on('dblclick', (params) => {
       if (!params.target) {
         dispatch(openDeal(null));
       }
